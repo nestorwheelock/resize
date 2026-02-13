@@ -19,7 +19,9 @@ Pre-built binaries are available on the [Releases](https://github.com/nestorwhee
 | Linux x86_64 | `resize-linux-x86_64` |
 | Windows x86_64 | `resize-windows-x86_64.exe` |
 
-### Linux
+### Installing on Linux
+
+Open a terminal (you can use Ctrl+Alt+T on most Linux desktops) and paste these three lines:
 
 ```bash
 curl -L https://github.com/nestorwheelock/resize/releases/latest/download/resize-linux-x86_64 -o resize
@@ -27,11 +29,90 @@ chmod +x resize
 sudo mv resize /usr/local/bin/
 ```
 
-### Windows
+That's it. The `resize` command is now available everywhere on your system.
 
-Download `resize-windows-x86_64.exe` from the [Releases](https://github.com/nestorwheelock/resize/releases) page and place it somewhere in your PATH.
+### Installing on Windows
 
-## Usage
+1. Go to the [Releases](https://github.com/nestorwheelock/resize/releases) page
+2. Download `resize-windows-x86_64.exe`
+3. Rename it to `resize.exe`
+4. Move it to a folder that's in your PATH (for example `C:\Windows\` or create a `C:\Tools\` folder and [add it to your PATH](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/))
+
+## Getting started — a quick guide
+
+Don't worry if you're new to the terminal. Using `resize` is simpler than opening a photo editor and clicking through menus for each image. One command handles everything at once.
+
+### Step 1: Open a terminal in your images folder
+
+You don't need to memorize any paths. Just navigate to the folder where your images are and open a terminal right there:
+
+**Linux (GNOME/Nautilus file manager):**
+- Open your file manager and go to the folder with your images
+- Right-click on an empty area in the folder
+- Select **"Open in Terminal"**
+
+**Linux (Dolphin/KDE file manager):**
+- Open the folder with your images
+- Right-click on an empty area
+- Select **"Open Terminal Here"**
+
+**Windows:**
+- Open File Explorer and go to your images folder
+- Click the address bar at the top, type `cmd`, and press Enter
+- A terminal will open already pointed at that folder
+
+### Step 2: Run resize
+
+Now just type:
+
+```bash
+resize
+```
+
+That's it. The tool will find all your images, resize them, and save the results into a new `resized/` folder right next to your originals. Your original files are never modified.
+
+You'll see output like this:
+
+```
+photo1: 4008x3008 -> 1200x901 (png)
+photo2: 3015x1390 -> 1200x553 (png)
+vacation: 800x600 (no resize needed, saved as png)
+Done! 3 image(s) saved to /home/user/Photos/resized
+```
+
+### Step 3: Find your resized images
+
+Open the `resized/` folder that appeared inside your images folder. All your social-media-ready images are there.
+
+```
+Your folder/
+├── photo1.jpg          (original, untouched)
+├── photo2.png          (original, untouched)
+├── vacation.webp       (original, untouched)
+└── resized/
+    ├── photo1.png      (resized copy)
+    ├── photo2.png      (resized copy)
+    └── vacation.png    (resized copy)
+```
+
+### Want WebP output instead?
+
+WebP files are smaller than PNG, which is great for uploading. Just add `-f webp`:
+
+```bash
+resize -f webp
+```
+
+### Resizing images in a different folder
+
+You don't have to open a terminal in the images folder. You can point `resize` at any folder:
+
+```bash
+resize /home/user/Photos
+resize -f webp /home/user/Vacation
+```
+
+## Usage reference
 
 ```
 resize [OPTIONS] [PATH]
@@ -44,52 +125,19 @@ resize [OPTIONS] [PATH]
 | `-f`, `--format <FORMAT>` | Output format: `png` or `webp` | `png` |
 | `-h`, `--help` | Print help | |
 
-### Examples
+### Supported input formats
 
-Resize all images in the current directory (output as PNG):
+| Format | Extensions |
+|--------|------------|
+| PNG | `.png` |
+| JPEG | `.jpg`, `.jpeg` |
+| WebP | `.webp` |
+| BMP | `.bmp` |
+| GIF | `.gif` |
+| TIFF | `.tiff`, `.tif` |
+| AVIF | `.avif` |
 
-```bash
-resize
-```
-
-Resize all images in a specific directory:
-
-```bash
-resize /home/user/Photos
-```
-
-Output as WebP instead of PNG:
-
-```bash
-resize -f webp /home/user/Photos
-```
-
-Output is saved to a `resized/` subdirectory inside the target path:
-
-```
-/home/user/Photos/
-├── photo1.jpg
-├── photo2.png
-├── screenshot.webp
-├── diagram.bmp
-└── resized/
-    ├── photo1.png
-    ├── photo2.png
-    ├── screenshot.png
-    └── diagram.png
-```
-
-### Supported formats
-
-| Input | Output |
-|-------|--------|
-| `.png` | `.png` or `.webp` |
-| `.jpg` / `.jpeg` | `.png` or `.webp` |
-| `.webp` | `.png` or `.webp` |
-| `.bmp` | `.png` or `.webp` |
-| `.gif` | `.png` or `.webp` |
-| `.tiff` / `.tif` | `.png` or `.webp` |
-| `.avif` | `.png` or `.webp` |
+All inputs can be saved as either `.png` or `.webp` output.
 
 ## Build from source
 
