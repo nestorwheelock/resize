@@ -1,0 +1,9 @@
+[package]
+name = "resize"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+image = "0.25"
+clap = { version = "4", features = ["derive"] }
