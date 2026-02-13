@@ -1,13 +1,14 @@
 # resize
 
-A fast CLI tool that resizes JPG and PNG images for social media sharing. Built in Rust.
+A fast, parallel CLI tool that resizes images for social media sharing. Built in Rust with [rayon](https://github.com/rayon-rs/rayon) for multi-core processing.
 
 ## What it does
 
-- Scans a directory for JPG and PNG images
+- Scans a directory for images (PNG, JPG, WebP, BMP, GIF, TIFF, AVIF)
 - Scales the longest side down to 1200px while maintaining aspect ratio
-- Saves all output as PNG to a `resized/` subdirectory
+- Saves output as PNG (default) or WebP to a `resized/` subdirectory
 - Skips images already 1200px or smaller (no upscaling)
+- Processes all images in parallel across CPU cores
 
 ## Download
 
@@ -33,12 +34,19 @@ Download `resize-windows-x86_64.exe` from the [Releases](https://github.com/nest
 ## Usage
 
 ```
-resize [PATH]
+resize [OPTIONS] [PATH]
 ```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-f`, `--format <FORMAT>` | Output format: `png` or `webp` | `png` |
+| `-h`, `--help` | Print help | |
 
 ### Examples
 
-Resize all images in the current directory:
+Resize all images in the current directory (output as PNG):
 
 ```bash
 resize
@@ -50,26 +58,38 @@ Resize all images in a specific directory:
 resize /home/user/Photos
 ```
 
+Output as WebP instead of PNG:
+
+```bash
+resize -f webp /home/user/Photos
+```
+
 Output is saved to a `resized/` subdirectory inside the target path:
 
 ```
 /home/user/Photos/
 ├── photo1.jpg
 ├── photo2.png
-├── vacation.jpeg
+├── screenshot.webp
+├── diagram.bmp
 └── resized/
     ├── photo1.png
     ├── photo2.png
-    └── vacation.png
+    ├── screenshot.png
+    └── diagram.png
 ```
 
 ### Supported formats
 
 | Input | Output |
 |-------|--------|
-| `.png` | `.png` |
-| `.jpg` | `.png` |
-| `.jpeg` | `.png` |
+| `.png` | `.png` or `.webp` |
+| `.jpg` / `.jpeg` | `.png` or `.webp` |
+| `.webp` | `.png` or `.webp` |
+| `.bmp` | `.png` or `.webp` |
+| `.gif` | `.png` or `.webp` |
+| `.tiff` / `.tif` | `.png` or `.webp` |
+| `.avif` | `.png` or `.webp` |
 
 ## Build from source
 

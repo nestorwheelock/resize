@@ -1,19 +1,33 @@
 // Copyright (C) 2026  nwheelo
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use image::ImageReader;
 use rayon::prelude::*;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 
+#[derive(Clone, ValueEnum)]
+enum OutputFormat {
+    Png,
+    Webp,
+}
+
+const INPUT_EXTENSIONS: &[&str] = &[
+    "png", "jpg", "jpeg", "webp", "bmp", "gif", "tiff", "tif", "avif",
+];
+
 #[derive(Parser)]
-#[command(about = "Resize JPG/PNG images to social-media-friendly dimensions (output always PNG)")]
+#[command(about = "Resize images to social-media-friendly dimensions")]
 struct Args {
     /// Directory containing images to resize (defaults to current directory)
     #[arg(default_value = ".")]
     path: PathBuf,
+
+    /// Output format
+    #[arg(short, long, value_enum, default_value_t = OutputFormat::Png)]
+    format: OutputFormat,
 }
 
 const MAX_SIDE: u32 = 1200;
@@ -21,6 +35,10 @@ const MAX_SIDE: u32 = 1200;
 fn main() {
     let args = Args::parse();
     let source = &args.path;
+    let ext = match args.format {
+        OutputFormat::Png => "png",
+        OutputFormat::Webp => "webp",
+    };
 
     if !source.is_dir() {
         eprintln!("Error: {} is not a directory", source.display());
@@ -48,13 +66,13 @@ fn main() {
             p.is_file()
                 && p.extension()
                     .and_then(|e| e.to_str())
-                    .map(|e| matches!(e.to_lowercase().as_str(), "png" | "jpg" | "jpeg"))
+                    .map(|e| INPUT_EXTENSIONS.contains(&e.to_lowercase().as_str()))
                     .unwrap_or(false)
         })
         .collect();
 
     if image_paths.is_empty() {
-        println!("No JPG/PNG images found in {}", source.display());
+        println!("No images found in {}", source.display());
         return;
     }
 
@@ -88,14 +106,14 @@ fn main() {
             let scale = MAX_SIDE as f64 / longest as f64;
             let new_w = (w as f64 * scale).round() as u32;
             let new_h = (h as f64 * scale).round() as u32;
-            println!("{file_stem}: {w}x{h} -> {new_w}x{new_h}");
+            println!("{file_stem}: {w}x{h} -> {new_w}x{new_h} ({ext})");
             img.resize(new_w, new_h, image::imageops::FilterType::Lanczos3)
         } else {
-            println!("{file_stem}: {w}x{h} (no resize needed)");
+            println!("{file_stem}: {w}x{h} (no resize needed, saved as {ext})");
             img
         };
 
-        let out_path = resized_dir.join(format!("{file_stem}.png"));
+        let out_path = resized_dir.join(format!("{file_stem}.{ext}"));
         if let Err(e) = output.save(&out_path) {
             eprintln!("Error saving {}: {e}", out_path.display());
             return;
