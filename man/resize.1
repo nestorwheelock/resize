@@ -1,0 +1,96 @@
+.TH RESIZE 1 "February 2026" "resize 0.3.0" "User Commands"
+.SH NAME
+resize \- resize images to social-media-friendly dimensions
+.SH SYNOPSIS
+.B resize
+[\fIOPTIONS\fR] [\fIPATH\fR]
+.SH DESCRIPTION
+.B resize
+scans a directory for image files and resizes any with a longest side
+greater than 1200 pixels, maintaining the original aspect ratio. Images
+already 1200px or smaller are saved without resizing. All images are
+processed in parallel across CPU cores for speed. Original files are
+never modified.
+.PP
+Resized images are saved to a
+.B resized/
+subdirectory inside the target path.
+.SH ARGUMENTS
+.TP
+.I PATH
+Directory containing images to resize. Defaults to the current directory.
+.SH OPTIONS
+.TP
+.BR \-f ", " \-\-format " " \fIFORMAT\fR
+Output format. Possible values:
+.BR png " (default), " webp ", " jpg ", " bmp ", " gif ", " tiff ", " avif .
+.TP
+.BR \-h
+Print short help summary.
+.TP
+.BR \-\-help
+Print detailed help with examples.
+.SH SUPPORTED INPUT FORMATS
+PNG (.png), JPEG (.jpg, .jpeg), WebP (.webp), BMP (.bmp),
+GIF (.gif), TIFF (.tiff, .tif), AVIF (.avif).
+.SH OUTPUT FORMATS
+png (default), webp, jpg, bmp, gif, tiff, avif.
+.SH EXAMPLES
+Resize all images in the current directory to PNG:
+.PP
+.RS
+.B resize
+.RE
+.PP
+Resize images in a specific folder:
+.PP
+.RS
+.B resize /home/user/Photos
+.RE
+.PP
+Output as WebP (smaller files, great for uploading):
+.PP
+.RS
+.B resize \-f webp
+.RE
+.PP
+Output as JPG from a specific directory:
+.PP
+.RS
+.B resize \-f jpg /home/user/Photos
+.RE
+.SH HOW IT WORKS
+.IP 1. 3
+Reads all supported image files from the given directory
+.IP 2. 3
+Resizes images with longest side > 1200px using the Lanczos3 filter
+.IP 3. 3
+Saves results to a \fBresized/\fR subdirectory
+.IP 4. 3
+Original files are never touched
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (invalid directory, permission denied, etc.).
+.SH QUICK START
+Open your file manager, navigate to a folder with images,
+right-click and select "Open in Terminal", then type:
+.B resize
+.PP
+On Windows, open File Explorer, click the address bar,
+type
+.B cmd
+and press Enter, then type:
+.B resize
+.SH AUTHOR
+Nestor Wheelock
+.SH LICENSE
+GPL-3.0-or-later
+.SH SEE ALSO
+.BR convert (1),
+.BR mogrify (1)
+.SH HOMEPAGE
+https://github.com/nestorwheelock/resize

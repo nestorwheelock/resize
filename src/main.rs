@@ -12,6 +12,11 @@ use std::sync::atomic::{AtomicU32, Ordering};
 enum OutputFormat {
     Png,
     Webp,
+    Jpg,
+    Bmp,
+    Gif,
+    Tiff,
+    Avif,
 }
 
 const INPUT_EXTENSIONS: &[&str] = &[
@@ -19,7 +24,53 @@ const INPUT_EXTENSIONS: &[&str] = &[
 ];
 
 #[derive(Parser)]
-#[command(about = "Resize images to social-media-friendly dimensions")]
+#[command(
+    about = "Resize images to social-media-friendly dimensions",
+    long_about = "Resize images to social-media-friendly dimensions.\n\n\
+        Scans a directory for image files and resizes any with a longest side \
+        greater than 1200px, maintaining the original aspect ratio. Images \
+        already 1200px or smaller are saved without resizing. All images are \
+        processed in parallel for speed. Original files are never modified.",
+    after_long_help = "\
+EXAMPLES:
+    Resize all images in the current directory to PNG:
+        resize
+
+    Resize images in a specific folder:
+        resize /home/user/Photos
+
+    Output as WebP (smaller files, great for uploading):
+        resize -f webp
+
+    Output as JPG:
+        resize -f jpg /home/user/Photos
+
+    Combine options:
+        resize -f avif /home/user/Vacation
+
+SUPPORTED INPUT FORMATS:
+    PNG (.png), JPEG (.jpg, .jpeg), WebP (.webp), BMP (.bmp),
+    GIF (.gif), TIFF (.tiff, .tif), AVIF (.avif)
+
+OUTPUT FORMATS:
+    png (default), webp, jpg, bmp, gif, tiff, avif
+
+HOW IT WORKS:
+    1. Reads all supported image files from the given directory
+    2. Resizes images with longest side > 1200px (Lanczos3 filter)
+    3. Saves results to a 'resized/' subdirectory
+    4. Original files are never touched
+
+QUICK START:
+    Open your file manager, navigate to a folder with images,
+    right-click and select \"Open in Terminal\", then type: resize
+
+    On Windows, open File Explorer, click the address bar,
+    type 'cmd' and press Enter, then type: resize
+
+HOMEPAGE:
+    https://github.com/nestorwheelock/resize"
+)]
 struct Args {
     /// Directory containing images to resize (defaults to current directory)
     #[arg(default_value = ".")]
@@ -38,6 +89,11 @@ fn main() {
     let ext = match args.format {
         OutputFormat::Png => "png",
         OutputFormat::Webp => "webp",
+        OutputFormat::Jpg => "jpg",
+        OutputFormat::Bmp => "bmp",
+        OutputFormat::Gif => "gif",
+        OutputFormat::Tiff => "tiff",
+        OutputFormat::Avif => "avif",
     };
 
     if !source.is_dir() {

@@ -6,7 +6,8 @@ A fast, parallel CLI tool that resizes images for social media sharing. Built in
 
 - Scans a directory for images (PNG, JPG, WebP, BMP, GIF, TIFF, AVIF)
 - Scales the longest side down to 1200px while maintaining aspect ratio
-- Saves output as PNG (default) or WebP to a `resized/` subdirectory
+- Saves output in your choice of format (PNG, WebP, JPG, BMP, GIF, TIFF, AVIF)
+- Defaults to PNG output
 - Skips images already 1200px or smaller (no upscaling)
 - Processes all images in parallel across CPU cores
 
@@ -95,21 +96,43 @@ Your folder/
     └── vacation.png    (resized copy)
 ```
 
-### Want WebP output instead?
+## Examples
 
-WebP files are smaller than PNG, which is great for uploading. Just add `-f webp`:
+### Default (PNG output)
+
+```bash
+resize
+resize /home/user/Photos
+```
+
+### WebP output (smaller files, great for uploading)
 
 ```bash
 resize -f webp
+resize -f webp /home/user/Photos
 ```
 
-### Resizing images in a different folder
-
-You don't have to open a terminal in the images folder. You can point `resize` at any folder:
+### JPG output
 
 ```bash
-resize /home/user/Photos
-resize -f webp /home/user/Vacation
+resize -f jpg
+resize -f jpg /home/user/Vacation
+```
+
+### Other formats
+
+```bash
+resize -f avif /home/user/Photos     # AVIF (very small files)
+resize -f tiff /home/user/Photos     # TIFF (lossless, large files)
+resize -f bmp /home/user/Photos      # BMP (uncompressed)
+resize -f gif /home/user/Photos      # GIF
+```
+
+### Getting help
+
+```bash
+resize -h          # Short help summary
+resize --help      # Detailed help with examples and supported formats
 ```
 
 ## Usage reference
@@ -122,22 +145,37 @@ resize [OPTIONS] [PATH]
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `-f`, `--format <FORMAT>` | Output format: `png` or `webp` | `png` |
-| `-h`, `--help` | Print help | |
+| `-f`, `--format <FORMAT>` | Output format: `png`, `webp`, `jpg`, `bmp`, `gif`, `tiff`, `avif` | `png` |
+| `-h` | Print short help summary | |
+| `--help` | Print detailed help with examples | |
 
-### Supported input formats
+### Supported formats
 
-| Format | Extensions |
-|--------|------------|
-| PNG | `.png` |
-| JPEG | `.jpg`, `.jpeg` |
-| WebP | `.webp` |
-| BMP | `.bmp` |
-| GIF | `.gif` |
-| TIFF | `.tiff`, `.tif` |
-| AVIF | `.avif` |
+| Format | Input extensions | Available as output |
+|--------|-----------------|-------------------|
+| PNG | `.png` | yes (default) |
+| JPEG | `.jpg`, `.jpeg` | yes (`-f jpg`) |
+| WebP | `.webp` | yes (`-f webp`) |
+| BMP | `.bmp` | yes (`-f bmp`) |
+| GIF | `.gif` | yes (`-f gif`) |
+| TIFF | `.tiff`, `.tif` | yes (`-f tiff`) |
+| AVIF | `.avif` | yes (`-f avif`) |
 
-All inputs can be saved as either `.png` or `.webp` output.
+## Man page
+
+A man page is included for Linux. To install it:
+
+```bash
+sudo cp man/resize.1 /usr/local/share/man/man1/
+sudo mandb -q
+man resize
+```
+
+Or use the built-in detailed help:
+
+```bash
+resize --help
+```
 
 ## Build from source
 
@@ -150,6 +188,15 @@ cargo build --release
 ```
 
 The binary will be at `target/release/resize`.
+
+### Using the Makefile
+
+```bash
+make              # Build Linux + Windows and update man page
+make install      # Build, install binary and man page to system
+make release      # Build and create GitHub release
+make clean        # Clean build artifacts
+```
 
 ### Cross-compile for Windows (from Linux)
 
