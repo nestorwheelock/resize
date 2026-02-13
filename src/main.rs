@@ -1,4 +1,4 @@
-// Copyright (C) 2026  nwheelo
+// Copyright (C) 2026  Nestor Wheelock
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use clap::{Parser, ValueEnum};
