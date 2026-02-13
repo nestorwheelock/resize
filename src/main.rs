@@ -3,8 +3,10 @@
 
 use clap::Parser;
 use image::ImageReader;
+use rayon::prelude::*;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 #[derive(Parser)]
 #[command(about = "Resize JPG/PNG images to social-media-friendly dimensions (output always PNG)")]
@@ -39,42 +41,43 @@ fn main() {
         }
     };
 
-    let mut count = 0;
+    let image_paths: Vec<PathBuf> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| {
+            p.is_file()
+                && p.extension()
+                    .and_then(|e| e.to_str())
+                    .map(|e| matches!(e.to_lowercase().as_str(), "png" | "jpg" | "jpeg"))
+                    .unwrap_or(false)
+        })
+        .collect();
 
-    for entry in entries.flatten() {
-        let path = entry.path();
+    if image_paths.is_empty() {
+        println!("No JPG/PNG images found in {}", source.display());
+        return;
+    }
 
-        if !path.is_file() {
-            continue;
-        }
+    let count = AtomicU32::new(0);
 
-        let ext = path
-            .extension()
-            .and_then(|e| e.to_str())
-            .map(|e| e.to_lowercase());
-
-        let is_image = matches!(ext.as_deref(), Some("png" | "jpg" | "jpeg"));
-        if !is_image {
-            continue;
-        }
-
+    image_paths.par_iter().for_each(|path| {
         let file_stem = match path.file_stem().and_then(|s| s.to_str()) {
             Some(s) => s.to_string(),
-            None => continue,
+            None => return,
         };
 
-        let reader = match ImageReader::open(&path) {
+        let reader = match ImageReader::open(path) {
             Ok(r) => r,
             Err(e) => {
                 eprintln!("Skipping {}: {e}", path.display());
-                continue;
+                return;
             }
         };
         let img = match reader.decode() {
             Ok(img) => img,
             Err(e) => {
                 eprintln!("Skipping {}: {e}", path.display());
-                continue;
+                return;
             }
         };
 
@@ -95,15 +98,12 @@ fn main() {
         let out_path = resized_dir.join(format!("{file_stem}.png"));
         if let Err(e) = output.save(&out_path) {
             eprintln!("Error saving {}: {e}", out_path.display());
-            continue;
+            return;
         }
 
-        count += 1;
-    }
+        count.fetch_add(1, Ordering::Relaxed);
+    });
 
-    if count == 0 {
-        println!("No JPG/PNG images found in {}", source.display());
-    } else {
-        println!("Done! {count} image(s) saved to {}", resized_dir.display());
-    }
+    let total = count.load(Ordering::Relaxed);
+    println!("Done! {total} image(s) saved to {}", resized_dir.display());
 }
