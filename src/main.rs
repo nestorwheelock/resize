@@ -48,6 +48,9 @@ EXAMPLES:
     Combine options:
         resize -f avif /home/user/Vacation
 
+    Re-process images that were already resized:
+        resize --overwrite /home/user/Photos
+
 SUPPORTED INPUT FORMATS:
     PNG (.png), JPEG (.jpg, .jpeg), WebP (.webp), BMP (.bmp),
     GIF (.gif), TIFF (.tiff, .tif), AVIF (.avif)
@@ -57,9 +60,10 @@ OUTPUT FORMATS:
 
 HOW IT WORKS:
     1. Reads all supported image files from the given directory
-    2. Resizes images with longest side > 1200px (Lanczos3 filter)
-    3. Saves results to a 'resized/' subdirectory
-    4. Original files are never touched
+    2. Skips images that already exist in resized/ (use --overwrite to redo)
+    3. Resizes images with longest side > 1200px (Lanczos3 filter)
+    4. Saves results to a 'resized/' subdirectory
+    5. Original files are never touched
 
 QUICK START:
     Open your file manager, navigate to a folder with images,
@@ -79,6 +83,10 @@ struct Args {
     /// Output format
     #[arg(short, long, value_enum, default_value_t = OutputFormat::Png)]
     format: OutputFormat,
+
+    /// Overwrite images that already exist in the resized/ directory
+    #[arg(short, long)]
+    overwrite: bool,
 }
 
 const MAX_SIDE: u32 = 1200;
@@ -133,12 +141,20 @@ fn main() {
     }
 
     let count = AtomicU32::new(0);
+    let skipped = AtomicU32::new(0);
 
     image_paths.par_iter().for_each(|path| {
         let file_stem = match path.file_stem().and_then(|s| s.to_str()) {
             Some(s) => s.to_string(),
             None => return,
         };
+
+        let out_path = resized_dir.join(format!("{file_stem}.{ext}"));
+
+        if !args.overwrite && out_path.exists() {
+            skipped.fetch_add(1, Ordering::Relaxed);
+            return;
+        }
 
         let reader = match ImageReader::open(path) {
             Ok(r) => r,
@@ -169,7 +185,6 @@ fn main() {
             img
         };
 
-        let out_path = resized_dir.join(format!("{file_stem}.{ext}"));
         if let Err(e) = output.save(&out_path) {
             eprintln!("Error saving {}: {e}", out_path.display());
             return;
@@ -179,5 +194,9 @@ fn main() {
     });
 
     let total = count.load(Ordering::Relaxed);
+    let total_skipped = skipped.load(Ordering::Relaxed);
+    if total_skipped > 0 {
+        println!("Skipped {total_skipped} already resized image(s)");
+    }
     println!("Done! {total} image(s) saved to {}", resized_dir.display());
 }

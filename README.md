@@ -128,6 +128,15 @@ resize -f bmp /home/user/Photos      # BMP (uncompressed)
 resize -f gif /home/user/Photos      # GIF
 ```
 
+### Re-process images (overwrite)
+
+By default, `resize` skips images that already exist in the `resized/` folder. This makes it fast to run repeatedly — only new images get processed. To force re-processing:
+
+```bash
+resize --overwrite
+resize -o /home/user/Photos
+```
+
 ### Getting help
 
 ```bash
@@ -146,6 +155,7 @@ resize [OPTIONS] [PATH]
 | Flag | Description | Default |
 |------|-------------|---------|
 | `-f`, `--format <FORMAT>` | Output format: `png`, `webp`, `jpg`, `bmp`, `gif`, `tiff`, `avif` | `png` |
+| `-o`, `--overwrite` | Overwrite images that already exist in resized/ | off |
 | `-h` | Print short help summary | |
 | `--help` | Print detailed help with examples | |
 

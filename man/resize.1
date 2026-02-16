@@ -1,4 +1,4 @@
-.TH RESIZE 1 "February 2026" "resize 0.3.0" "User Commands"
+.TH RESIZE 1 "February 2026" "resize 0.3.1" "User Commands"
 .SH NAME
 resize \- resize images to social-media-friendly dimensions
 .SH SYNOPSIS
@@ -24,6 +24,10 @@ Directory containing images to resize. Defaults to the current directory.
 .BR \-f ", " \-\-format " " \fIFORMAT\fR
 Output format. Possible values:
 .BR png " (default), " webp ", " jpg ", " bmp ", " gif ", " tiff ", " avif .
+.TP
+.BR \-o ", " \-\-overwrite
+Overwrite images that already exist in the resized/ directory.
+By default, images that have already been resized are skipped.
 .TP
 .BR \-h
 Print short help summary.
@@ -59,14 +63,22 @@ Output as JPG from a specific directory:
 .RS
 .B resize \-f jpg /home/user/Photos
 .RE
+.PP
+Re-process all images even if already resized:
+.PP
+.RS
+.B resize \-\-overwrite /home/user/Photos
+.RE
 .SH HOW IT WORKS
 .IP 1. 3
 Reads all supported image files from the given directory
 .IP 2. 3
-Resizes images with longest side > 1200px using the Lanczos3 filter
+Skips images that already exist in resized/ (use \-\-overwrite to redo)
 .IP 3. 3
-Saves results to a \fBresized/\fR subdirectory
+Resizes images with longest side > 1200px using the Lanczos3 filter
 .IP 4. 3
+Saves results to a \fBresized/\fR subdirectory
+.IP 5. 3
 Original files are never touched
 .SH EXIT STATUS
 .TP
